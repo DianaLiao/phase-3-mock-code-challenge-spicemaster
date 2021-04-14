@@ -3,16 +3,28 @@
     {
       "id": 1,
       "title": "Autumnal Hell",
-      "image": "./assets/spices/pumpkinspicelatte.jpg"
+      "image": "./assets/spices/pumpkinspicelatte.jpg",
+      "ingredients": [
+        {
+          "name": "ennui",
+          "spiceblendId": 1,
+          "id": 19
+        },
+        {
+          "name": "sadness",
+          "spiceblendId": 1,
+          "id": 21
+        }
+      ]
     },
     {
       "id": 2,
-      "title": "Za'atar",
+      "title": "Yum Bread",
       "image": "./assets/spices/zaatar.jpg"
     },
     {
       "id": 3,
-      "title": "Garlic Pepper Salt",
+      "title": "Is it Parmesan? No one knows",
       "image": "./assets/spices/garlicsalt.jpg"
     },
     {
@@ -106,6 +118,26 @@
       "name": "Pepper",
       "spiceblendId": 3,
       "id": 17
+    },
+    {
+      "name": "sadness",
+      "spiceblendId": 1,
+      "id": 18
+    },
+    {
+      "name": "ennui",
+      "spiceblendId": 1,
+      "id": 19
+    },
+    {
+      "name": "sadness",
+      "spiceblendId": 1,
+      "id": 20
+    },
+    {
+      "name": "sadness",
+      "spiceblendId": 1,
+      "id": 21
     }
   ]
 }

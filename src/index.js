@@ -7,33 +7,49 @@ window.addEventListener("DOMContentLoaded", _ => {
 
 const spiceBlendUrl = "http://localhost:3000/spiceblends"
 const ingredientUrl = "http://localhost:3000/ingredients"
-const imageBar = document.querySelector("div#spice-images")
 const spiceBlendDisplay = document.querySelector("div#spice-blend-detail")
 const spiceBlendUpdateForm = document.querySelector("form#update-form")
 const spiceBlendIngredientForm = document.querySelector("form#ingredient-form")
+const spiceImageBar = document.querySelector("div#spice-images")
 
 spiceBlendUpdateForm.addEventListener("submit", updateSpiceBlend)
 spiceBlendIngredientForm.addEventListener("submit", addIngredient)
+spiceImageBar.addEventListener("click", event => {
+  if (event.target.matches("img")) {
+    fetch(`${spiceBlendUrl}/${event.target.dataset.id}`)
+      .then(resp => resp.json())
+      .then(displaySelectedBlend)
+  }
+})
 
 function fetchAllBlends(){
   fetch(spiceBlendUrl).then(resp => resp.json())
-    .then(blends => console.table(blends) //blends.forEach(renderOneBlend)
-    )
+    .then(addBlendImages)
+}
+
+function addBlendImages(blends){
+  blends.forEach(blend =>{
+    const img = document.createElement("img")
+    const image = blend.image
+    img.src = image
+    img.alt = blend.title
+    img.dataset.id = blend.id
+    spiceImageBar.append(img)
+  })
 }
 
 function renderFirstBlend(){
-  fetch(spiceBlendUrl).then(resp => resp.json())
+  fetch(`${spiceBlendUrl}/?_limit=1`).then(resp => resp.json())
     .then(blends => displaySelectedBlend(blends[0]))
-
-  //come back and google proper query for limit 1
 }
 
 function displaySelectedBlend(blend){
   const image = spiceBlendDisplay.querySelector("img.detail-image")
   const title = spiceBlendDisplay.querySelector("h2.title")
-  // const ingredientsList = spiceBlendDisplay.querySelector("div.ingredients-container")
+  const ingredientsList = spiceBlendDisplay.querySelector("div.ingredients-container")
   
   image.src = blend.image
+  image.alt = blend.title
   title.textContent = blend.title
 
   if (blend.ingredients){
@@ -44,6 +60,7 @@ function displaySelectedBlend(blend){
       ingredientsList.append(ingredLi)
     })
   }
+  else ingredientsList.innerHTML = "<!-- Add Spice Blend Ingredients Here -->"
 
   spiceBlendUpdateForm.dataset.id = blend.id
   spiceBlendIngredientForm.dataset.id = blend.id
@@ -57,18 +74,22 @@ function updateSpiceBlend(event){
   fetch(`${spiceBlendUrl}/${event.target.dataset.id}`, fetchObj("PATCH", {title}))
     .then(resp => resp.json())
     .then(displaySelectedBlend)
+
+  spiceBlendUpdateForm.reset()
 }
 
 function addIngredient(event){
   event.preventDefault()
 
-  const ingred = spiceBlendIngredientForm.value
-  
-  const ingredientsList = spiceBlendDisplay.querySelector("div.ingredients-container")
-  const ingredLi = document.createElement("li")
-  ingredLi.textContent = spiceBlendIngredientForm.name.value
+  const spiceblendId = parseInt(event.target.dataset.id, 10) 
+  const name = spiceBlendIngredientForm.name.value
 
-  ingredientsList.append(ingredLi)
+  fetch(ingredientUrl, fetchObj("POST",{name, spiceblendId}))
+    .then(resp => resp.json())
+    .then(ingred => {
+      renderIngredient(ingred)
+      addIngredientToBlend(ingred,spiceblendId)
+    })
 }
 
 function renderIngredient(ingred){
@@ -77,6 +98,21 @@ function renderIngredient(ingred){
   ingredLi.textContent = ingred.name
 
   ingredientsList.append(ingredLi)
+}
+
+function addIngredientToBlend(ingred, spiceblendId){
+  fetch(`${spiceBlendUrl}/${spiceblendId}`)
+    .then(resp => resp.json())
+    .then(blend => {
+      if (blend.ingredients){
+        blend.ingredients.push(ingred)
+      }
+      else {
+        blend.ingredients = [ingred]
+      }
+
+      fetch(`${spiceBlendUrl}/${spiceblendId}`, fetchObj("PATCH", blend))
+    })
 }
 
 function fetchObj(method, body){
